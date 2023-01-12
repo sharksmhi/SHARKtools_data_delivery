@@ -286,11 +286,14 @@ class PageCTD(tk.Frame):
             logger.warning(msg)
             messagebox.showwarning('Filer saknas', msg)
             return
-        msg = self._check_all_packs_content()
-        if msg:
+        ans = self._check_all_packs_content()
+        if ans:
+            nr_files, msg = ans
             logger.warning(msg)
             messagebox.showwarning('Otillräcklig information', msg)
-            return
+            ans = messagebox.askyesno('Otillräcklig information', f'{nr_files} filer kommer inte komma med i levarensen!\nVill du gå vidare i alla fall?')
+            if not ans:
+                return
         self._update_stat_all()
         self._update_listbox_files()
 
@@ -348,7 +351,7 @@ class PageCTD(tk.Frame):
             new_pack_list.append(pack)
         self._all_packs_in_source_directory = new_pack_list
         if missing_txt:
-            return f'Det saknas standardformat för: {", ".join(missing_txt)}. Dessa kommer inte att inkluderas'
+            return len(missing_txt), f'Det saknas standardformat för: {", ".join(missing_txt)}. Dessa kommer inte att inkluderas'
 
     def _check_selected_packs_content(self):
         missing_sensorinfo = []
