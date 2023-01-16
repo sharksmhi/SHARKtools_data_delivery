@@ -59,7 +59,7 @@ class PageCTD(tk.Frame):
     def startup(self):
         self._build()
         self._add_to_save()
-        self._on_select_local_dir()
+        # self._on_select_local_dir()
 
     def _add_to_save(self):
         self._saves.add_components(*list(self._stringvars_path.values()))
