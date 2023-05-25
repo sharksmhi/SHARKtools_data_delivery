@@ -166,6 +166,7 @@ class PageCTD(tk.Frame):
         r = 0
         tk.Button(frame, text='Lokal rotmapp (källmapp)', command=self._select_local_root_dir, **opt).grid(row=r, column=0, **grid)
         tk.Label(frame, textvariable=self._stringvars_path['local_root_dir']()).grid(row=r, column=1, **grid, sticky='w')
+        tk.Button(frame, text='Uppdatera', command=self._on_select_local_dir).grid(row=r, column=2, **grid)
         r += 1
         tk.Button(frame, text='Exportmapp', command=self._select_output_dir, **opt).grid(row=r, column=0, **grid)
         tk.Label(frame, textvariable=self._stringvars_path['output_dir']()).grid(row=r, column=1, **grid, sticky='w')
@@ -276,31 +277,36 @@ class PageCTD(tk.Frame):
         return meta
 
     def _on_select_local_dir(self):
-        directory = self._get_paths().get('local_root_dir')
-        if not directory:
-            return
-        self._all_packs_in_source_directory = file_explorer.get_packages_in_directory(directory, exclude_directory='temp', as_list=True)
-        logger.info(f'{ self._all_packs_in_source_directory=}')
-        if not self._all_packs_in_source_directory:
-            msg = f'inga fullständiga paket i rotkatalogen: {directory}'
-            logger.warning(msg)
-            messagebox.showwarning('Filer saknas', msg)
-            return
-        ans = self._check_all_packs_content()
-        if ans:
-            nr_files, msg = ans
-            logger.warning(msg)
-            messagebox.showwarning('Otillräcklig information', msg)
-            ans = messagebox.askyesno('Otillräcklig information', f'{nr_files} filer kommer inte komma med i levarensen!\nVill du gå vidare i alla fall?')
-            if not ans:
+        try:
+            directory = self._get_paths().get('local_root_dir')
+            if not directory:
                 return
-        self._update_stat_all()
-        self._update_listbox_files()
+            self._all_packs_in_source_directory = file_explorer.get_packages_in_directory(directory, exclude_directory='temp', as_list=True)
+            logger.info(f'{ self._all_packs_in_source_directory=}')
+            if not self._all_packs_in_source_directory:
+                msg = f'inga fullständiga paket i rotkatalogen: {directory}'
+                logger.warning(msg)
+                messagebox.showwarning('Filer saknas', msg)
+                return
+            ans = self._check_all_packs_content()
+            if ans:
+                nr_files, msg = ans
+                logger.warning(msg)
+                messagebox.showwarning('Otillräcklig information', msg)
+                ans = messagebox.askyesno('Otillräcklig information', f'{nr_files} filer kommer inte komma med i levarensen!\nVill du gå vidare i alla fall?')
+                if not ans:
+                    return
+            self._update_stat_all()
+            self._update_listbox_files()
+        except Exception:
+            messagebox.showerror('Något gick fel', traceback.format_exc())
 
     def _on_select_files(self):
         selected_names = self._listbox_files.get_selected()
         keys = [name.split('.')[0] for name in selected_names]
         self._selected_packs = [pack for pack in self._all_packs_in_source_directory if pack.key in keys]
+        print('Selected packages')
+        print(f'{self._selected_packs}')
         self._update_stat()
 
     def _update_listbox_files(self):
@@ -364,6 +370,8 @@ class PageCTD(tk.Frame):
 
     def _update_stat(self):
         self._reset_stat()
+        if not self._selected_packs:
+            return
         stat = self._get_packs_statistics()
         for suffix, nr in stat['nr_files'].items():
             self._stringvars_stat[suffix].set(str(nr or 0))
