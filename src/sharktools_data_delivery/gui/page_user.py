@@ -4,7 +4,7 @@
 
 import tkinter as tk
 
-from sharkpylib import utils
+from sharktools_data_delivery import utils
 
 """
 ================================================================================

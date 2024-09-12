@@ -1,0 +1,25 @@
+[project]
+name = "SHARKtools_data_delivery"
+version = "1.0.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Magnus Wenzer", email = "magnus.wenzer@smhi.se"},
+]
+dependencies = [
+    "ctd-processing @ git+https://github.com/sharksmhi/ctd_processing.git@v1.0.0",
+    "SHARKtools @ git+https://github.com/sharksmhi/SHARKtools.git@v1.0.0",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project.entry-points.'sharktools.plugins']
+ctd_processing = 'sharktools_data_delivery'
+
+
+[tool.pdm]
+distribution = true
